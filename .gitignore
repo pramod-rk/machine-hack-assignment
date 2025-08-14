@@ -1,0 +1,57 @@
+# === Python / FastAPI (Backend) ===
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environment
+venv/
+env/
+ENV/
+.venv/
+
+# VSCode / PyCharm / IDE settings
+.vscode/
+.idea/
+
+# Python environment files
+*.env
+*.env.*
+.envrc
+
+# Migrations
+migrations/
+
+# PyInstaller
+dist/
+build/
+*.spec
+
+# Logs
+*.log
+
+# === Node.js / Vite / React (Frontend) ===
+
+# Node modules
+frontend/node_modules/
+
+# Build output
+frontend/dist/
+
+# Logs
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
+
+# Env files
+frontend/.env
+frontend/.env.*
+
+# Vite cache
+frontend/.vite/
+
+# === OS Files ===
+
+.DS_Store
+Thumbs.db
