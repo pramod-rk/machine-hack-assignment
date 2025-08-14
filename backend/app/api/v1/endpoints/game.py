@@ -15,8 +15,10 @@ from datetime import datetime
 from services import ai
 import uuid
 import logging
+
 router = APIRouter(prefix="/game", tags=["game"])
 TOTAL_QUESTIONS = 3
+
 def _generate_anon_tag(db: Session, room_id: int) -> str:
     # simple random tag: Anon-XXXX
     return "Anon-" + uuid.uuid4().hex[:4].upper()
@@ -58,7 +60,6 @@ async def submit_answer(payload: AnswerCreate, db: Session = Depends(get_db), cu
     if not participant:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not a participant")
 
-
     # return anonymized representation (votes_count initially 0)
     return {"id": answer.id, "anon_tag": answer.anon_tag, "created_at": answer.created_at, "votes_count": 0}
 
@@ -99,7 +100,6 @@ async def vote(payload: VoteCreate, db: Session = Depends(get_db), current_user 
     leaderboard = scoring.compute_leaderboard(db, room.id)
     await ws_manager.broadcast_leaderboard(room.room_code, leaderboard)
 
-    # --- NEW LOGIC: Check if all votes for this round are done ---
     # Get current round
     current_round = db.query(Round).filter_by(id=answer.round_id).first()
     # Get all answers for this round
@@ -131,7 +131,6 @@ async def vote(payload: VoteCreate, db: Session = Depends(get_db), current_user 
                 "type": "game_over",
                 "leaderboard": leaderboard
             })
-    # --- END NEW LOGIC ---
     return {"answer_id": payload.answer_id, "votes_count": votes_count}
 
 @router.get("/leaderboard")

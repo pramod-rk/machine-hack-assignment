@@ -10,8 +10,8 @@ export default function useRoomWebsocket(roomCode, onMessage) {
     const protocol = window.location.protocol === "https:" ? "wss" : "ws";
     // If API is cross-origin, set host from env
     console.log('prk ptotocal', protocol)
-    // const host = process.env.REACT_APP_WS_BASE || window.location.host;
-    const host = "localhost:8000";
+    const host = import.meta.env.VITE_WS_BASE;
+    // const host = "localhost:8000";
     // const host = window.location.host;
     const url = `${protocol}://${host}/api/v1/ws/rooms/${roomCode}`;
     console.log('prk, url', url);

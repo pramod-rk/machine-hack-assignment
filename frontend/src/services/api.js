@@ -1,6 +1,5 @@
 // src/services/api.js
-// const API_BASE = process.env.REACT_APP_API_BASE || ""; // e.g. "http://localhost:8000"
-const API_BASE = "http://localhost:8000/api/v1" || ""; // e.g. "http://localhost:8000"
+const API_BASE = import.meta.env.VITE_API_BASE || "";
 
 async function apiFetch(path, opts = {}) {
   const res = await fetch(`${API_BASE}${path}`, {
