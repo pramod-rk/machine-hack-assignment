@@ -3,8 +3,8 @@ import React, { useState } from "react";
 import { login, register } from "../services/api";
 
 export default function LoginForm({ onLoggedIn }) {
-  const [email, setEmail] = useState("user2@example.com");
-  const [password, setPassword] = useState("pass123");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [isRegister, setIsRegister] = useState(false);
   const [err, setErr] = useState(null);
 
