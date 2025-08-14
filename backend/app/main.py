@@ -20,6 +20,7 @@ app = FastAPI(title="Voting Game API")
 origins = [
     "http://localhost:5173",  # Vite dev server
     "http://127.0.0.1:5173",  # Some browsers resolve like this
+    "https://machine-hack-assignment-beta.vercel.app/"
 ]
 
 app.add_middleware(
