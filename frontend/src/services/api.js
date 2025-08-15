@@ -34,7 +34,7 @@ export async function logout() {
 }
 
 export async function createRoom() {
-  return apiFetch("/rooms", { method: "POST" });
+  return apiFetch("/rooms/", { method: "POST" });
 }
 
 export async function joinRoom(room_code) {
