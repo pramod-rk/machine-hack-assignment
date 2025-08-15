@@ -1,18 +1,9 @@
-# from fastapi import FastAPI
-# from api.v1.endpoints import rooms
-
-# app = FastAPI()
-
-
-# app.include_router(rooms.router, prefix="/v1", tags=["my rooms"])
-
-
-
 from fastapi import FastAPI
 from api.v1.endpoints import auth, rooms, ws, game
 from db.init_db import init_db
 from fastapi.middleware.cors import CORSMiddleware
 import logging
+from starlette.middleware.proxy_headers import ProxyHeadersMiddleware
 
 
 
@@ -31,6 +22,7 @@ app.add_middleware(
     allow_methods=["*"],  # or limit to ["GET", "POST", "OPTIONS", ...]
     allow_headers=["*"],
 )
+app.add_middleware(ProxyHeadersMiddleware)
 
 
 app.include_router(auth.router, prefix="/api/v1")
