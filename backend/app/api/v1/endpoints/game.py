@@ -49,7 +49,7 @@ async def submit_answer(payload: AnswerCreate, db: Session = Depends(get_db), cu
     db.refresh(answer)
 
     # Build anonymized stub for broadcast (no user id)
-    stub = {"id": answer.id, "anon_tag": answer.anon_tag, "created_at": answer.created_at.isoformat()}
+    stub = {"id": answer.id, "anon_tag": answer.anon_tag, "created_at": answer.created_at.isoformat(), "text": payload.text}
 
     # broadcast to room
     await ws_manager.broadcast_new_answer(payload.room_code, stub)

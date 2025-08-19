@@ -3,6 +3,7 @@ import React, { useCallback, useState } from "react";
 import useRoomWebsocket from "../hooks/useRoomWebsocket";
 import { submitAnswer, voteAnswer, startRoom } from "../services/api";
 import { Users, Send, ThumbsUp, Crown, Wifi, WifiOff, Play, Trophy, Medal, Award, Star, X } from "lucide-react";
+import SpinnerOverlay from "./SpinnerOverlay";
 
 
 export default function GameRoom({ roomCode, initialRoom, currentUserEmail, isHost }) {
@@ -20,6 +21,9 @@ export default function GameRoom({ roomCode, initialRoom, currentUserEmail, isHo
   const [votedAnswers, setVotedAnswers] = useState(new Set());
   const [showLeaderboard, setShowLeaderboard] = useState(false);
   const [leaderboardData, setLeaderboardData] = useState([]);
+  const [isStarting, setIsStarting] = useState(false);
+  const [isTransitioning, setIsTransitioning] = useState(false);
+  const [isVoting, setIsVoting] = useState(false);
 
   const onMessage = useCallback(
     (msg) => {
@@ -36,6 +40,8 @@ export default function GameRoom({ roomCode, initialRoom, currentUserEmail, isHo
         setAnswers([]);
         setText("");
         setVotedAnswers(new Set());
+        setIsStarting(false);
+        setIsTransitioning(false);
       } else if (msg.type === "new_answer") {
         setAnswers((prev) => [...prev, { ...msg.answer, votes_count: 0 }]);
       } else if (msg.type === "vote_update") {
@@ -46,11 +52,17 @@ export default function GameRoom({ roomCode, initialRoom, currentUserEmail, isHo
               : a
           )
         );
+        if (!isTransitioning && answers.length > 0) {
+          setIsTransitioning(true);
+        }
+        setIsVoting(false); 
       } else if (msg.type === "leaderboard") {
         console.log("leaderboard", msg.leaderboard);
       } else if (msg.type === "game_over") {
         setLeaderboardData(msg.leaderboard);
         setShowLeaderboard(true);
+        setIsTransitioning(false);
+        setIsVoting(false);
       }
     },
     [currentUserEmail]
@@ -74,19 +86,23 @@ export default function GameRoom({ roomCode, initialRoom, currentUserEmail, isHo
 
   async function handleVote(answerId) {
     if (votedAnswers.has(answerId)) return;
+    setIsVoting(true);
     try {
       await voteAnswer(answerId);
       setVotedAnswers(prev => new Set([...prev, answerId]));
     } catch (e) {
       alert(e.message || "Vote failed");
+      setIsVoting(false);
     }
   }
 
   async function handleStart() {
+    setIsStarting(true);
     try {
       await startRoom(roomCode);
     } catch (e) {
       alert(e.message || "Start failed");
+      setIsStarting(false);
     }
   }
 
@@ -213,10 +229,20 @@ export default function GameRoom({ roomCode, initialRoom, currentUserEmail, isHo
               {isHost && !question && (
                 <button
                   onClick={handleStart}
+                  disabled={isStarting}
                   className="w-full py-3 bg-white text-purple-600 rounded-xl font-semibold hover:bg-white/90 transition-all duration-200 flex items-center justify-center group transform hover:scale-[1.02]"
                 >
-                  <Play className="w-5 h-5 mr-2 group-hover:animate-pulse" />
-                  Start Game
+                  {isStarting ? (
+                    <>
+                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-purple-600 mr-2"></div>
+                      Starting Game...
+                    </>
+                  ) : (
+                    <>
+                      <Play className="w-5 h-5 mr-2 group-hover:animate-pulse" />
+                      Start Game
+                    </>
+                  )}
                 </button>
               )}
             </div>
@@ -229,7 +255,14 @@ export default function GameRoom({ roomCode, initialRoom, currentUserEmail, isHo
               <h2 className="text-lg font-semibold text-white mb-4">
                 Current Question
               </h2>
-              {question ? (
+              {isTransitioning ? (
+                <div className="text-center py-8">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
+                  <p className="text-white/70 text-lg">
+                    Loading next question...
+                  </p>
+                </div>
+              ) : question ? (
                 <div className="bg-white/10 rounded-xl p-6 border border-white/20">
                   <p className="text-xl text-white font-medium leading-relaxed">
                     {question.text}
@@ -248,7 +281,7 @@ export default function GameRoom({ roomCode, initialRoom, currentUserEmail, isHo
             </div>
 
             {/* Submit Answer */}
-            {question && (
+            {question && !isTransitioning && (
               <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20">
                 <h3 className="text-lg font-semibold text-white mb-4">
                   Submit Your Answer
@@ -426,6 +459,10 @@ export default function GameRoom({ roomCode, initialRoom, currentUserEmail, isHo
           </div>
         </div>
       )}
+      <SpinnerOverlay
+        isVisible={isVoting} 
+        message="Processing your vote..." 
+      />
     </>
   );
 }
