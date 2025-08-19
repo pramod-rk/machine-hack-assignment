@@ -10,8 +10,6 @@ import logging
 
 router = APIRouter()
 
-# logging.basicConfig(level=logging.INFO)
-
 
 # mount path: /ws/rooms/{room_code}
 @router.websocket("/ws/rooms/{room_code}")

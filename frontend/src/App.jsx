@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import LoginForm from "./components/LoginForm";
 import CreateJoinRoom from "./components/CreateJoinRoom";
 import GameRoom from "./components/GameRoom";
-import { logout, getLeaderboard } from "./services/api";
+import { logout } from "./services/api";
 
 export default function App() {
   const [loggedIn, setLoggedIn] = useState(false);
@@ -11,17 +11,18 @@ export default function App() {
   const [room, setRoom] = useState(null);
   const [userEmail, setUserEmail] = useState(null);
   const [isHost, setIsHost] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // You could call /me endpoint to fetch current user (server must provide)
   async function refreshUser() {
     try {
-      // If you implemented a /me protected endpoint, call it here to fetch email and id
-      // const current = await apiFetch("/auth/me");
-      // setUserEmail(current.email);
+
     } catch {}
+    setIsLoading(false);
   }
 
-  useEffect(() => { refreshUser(); }, []);
+  useEffect(() => {
+    refreshUser();
+  }, []);
 
   function onLoggedIn() {
     setLoggedIn(true);
@@ -31,11 +32,7 @@ export default function App() {
   function onJoined(newRoomCode, roomObj) {
     setRoomCode(newRoomCode);
     setRoom(roomObj);
-    // host detection — room.host_user_id available from backend create/join
-    // ideally return whether current user is host from backend /me or room payload
-    // for demo, rely on server returning participant array and match by email if available
-    // we leave isHost to true if current user created the room (caller set)
-    setIsHost(true); // set appropriately in real app
+    setIsHost(true);
   }
 
   async function doLogout() {
@@ -46,24 +43,39 @@ export default function App() {
     setUserEmail(null);
   }
 
-  if (!loggedIn) {
-    return <LoginForm onLoggedIn={onLoggedIn} />;
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-600 via-blue-600 to-cyan-500 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white"></div>
+      </div>
+    );
   }
 
-  if (!roomCode) {
-    return <CreateJoinRoom onJoined={onJoined} />;
-  }
+  if (!loggedIn) return <LoginForm onLoggedIn={onLoggedIn} />;
+  if (!roomCode) return <CreateJoinRoom onJoined={onJoined} />;
 
   return (
-    <div>
-      <div style={{ display: "flex", justifyContent: "space-between", padding: 12 }}>
-        <div>Logged in as: {userEmail ?? "you"}</div>
-        <div>
-          <button onClick={doLogout}>Logout</button>
+    <div className="min-h-screen bg-gradient-to-br from-purple-600 via-blue-600 to-cyan-500">
+      <div className="bg-white/10 backdrop-blur-sm border-b border-white/20 px-6 py-4">
+        <div className="max-w-7xl mx-auto flex justify-between items-center">
+          <div className="text-white font-medium">
+            Welcome, {userEmail ?? "Player"}!
+          </div>
+          <button 
+            onClick={doLogout}
+            className="px-4 py-2 bg-white/20 hover:bg-white/30 text-white rounded-lg transition-all duration-200 backdrop-blur-sm border border-white/20 hover:scale-105"
+          >
+            Logout
+          </button>
         </div>
       </div>
-
-      <GameRoom roomCode={roomCode} initialRoom={room} isHost={isHost} currentUserEmail={userEmail} />
+      <GameRoom 
+        roomCode={roomCode} 
+        initialRoom={room} 
+        isHost={isHost} 
+        currentUserEmail={userEmail} 
+      />
     </div>
+
   );
 }

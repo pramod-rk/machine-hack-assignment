@@ -10,6 +10,7 @@ class Settings(BaseSettings):
     COOKIE_SECURE: bool = False  # set True in production (HTTPS)
     COOKIE_SAMESITE: str = "lax"
     ACCESS_TOKEN_NAME: str = "access_token"
+    GEMINI_API_KEY: str | None = None  # Optional, for AI services
 
     class Config:
         env_file = ".env"
